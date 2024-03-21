@@ -1,7 +1,7 @@
 """
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
-from flask import Flask, request, jsonify, url_for, Blueprint
+from flask import Flask, request, jsonify, url_for, Blueprint,current_app
 from api.models import db, User
 from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
@@ -36,23 +36,26 @@ def login():
     password = request.json.get("password", None)
 
     usuario=User.query.filter_by(email=username).first()
+    checkPass = current_app.bcrypt.check_password_hash(usuario.password,password)
+   
     if usuario is None:
         return jsonify({"msg": "no existe el usuario"}), 401
-    if username != usuario.email or password != usuario.password:
+    if username != usuario.email or not checkPass:
         return jsonify({"msg": "Bad username or password"}), 401
 
     access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token)
+    return jsonify(access_token=access_token),200
 
 
 @api.route("/registrar", methods=["POST"])
 def register():
     body=json.loads(request.data)
     usuario=User.query.filter_by(email=body["email"]).first()
+    pw_hash = current_app.bcrypt.generate_password_hash(body["password"]).decode("utf-8")
     if usuario is None:
         nuevoUsuario=User(
             email=body["email"],
-            password=body["password"]
+            password=pw_hash
         )
         db.session.add(nuevoUsuario)
         db.session.commit()

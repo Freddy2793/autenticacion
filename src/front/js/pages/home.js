@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { Context } from "../store/appContext";
 import rigoImageUrl from "../../img/rigo-baby.jpg";
 import "../../styles/home.css";
+import { useNavigate } from "react-router-dom";
 
 export const Home = () => {
 	const { store, actions } = useContext(Context);
@@ -9,17 +10,38 @@ export const Home = () => {
 	const [email,setEmail]=useState("")
 	const [password,setPassword]=useState("")
 
-	const iniciar=(e) =>{
+	const navigate = useNavigate()
+
+	const iniciar=async(e) =>{
 		
 		e.preventDefault()
-		actions.iniciar(email,password)
+		
+
+		if(email != "" && password != "")  {
+
+			await actions.iniciar(email,password)
+			if(store.auth){
+				navigate("/demo")
+			}
+			
+		} else {
+			
+			alert("Faltan Datos")
+		}
 
 	}
 
 	const registro=(e) =>{
 		
 		e.preventDefault()
-		actions.registro(email,password)
+
+		if(email != "" && password != "")  {
+
+			actions.registro(email,password)
+		} else {
+			
+			alert("Faltan Datos")
+		}
 
 	}
 

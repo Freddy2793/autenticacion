@@ -1,7 +1,7 @@
 const getState = ({ getStore, getActions, setStore }) => {
 	return {
 		store: {
-			
+			auth:false
 		},
 		actions: {
 			// Use getActions to call a function within a fuction
@@ -15,10 +15,25 @@ const getState = ({ getStore, getActions, setStore }) => {
 						}),
 						headers:{"Content-Type":"application/json"}
 					})
+					if(response.status==200){
+
+					
 					const data = await response.json()
 
-					console.log(data)
+					localStorage.setItem("token",data.access_token)
 
+					setStore({
+						auth:true
+					})
+
+					// console.log(data)
+				}else{
+
+					setStore({
+						auth:false
+					})
+
+				}
 				} catch (error) {
 					console.log (error)
 				}
@@ -41,6 +56,13 @@ const getState = ({ getStore, getActions, setStore }) => {
 				} catch (error) {
 					console.log (error)
 				}
+			},
+
+			logout:() =>{
+				localStorage.removeItem("token")
+				setStore({
+					auth:false
+				})
 			}
 
 			
